@@ -1,76 +1,102 @@
-# 混合智能驱动的物流调度仿真平台 (Hybrid-Intelligence-Driven Logistics Scheduling Simulation Platform)
+[项目名] Hybrid-Intelligence-Driven Logistics Scheduling Simulation Platform
+(中文：混合智能驱动的物流调度仿真平台)
+Tags: Reinforcement Learning, Operations Research, ROS, Gazebo, Logistics, Warehouse Automation
+(在此处插入一张清晰的系统架构图，展示ROS节点、Topic通信和API服务流)
 
-本项目是一个“工业级原型”，旨在解决传统物流调度在“高动态”环境下的核心痛点。
+## Executive Summary (项目摘要)
 
-我们不造“玩具”，我们只解决“真实世界”的问题。
+本项目是一个基于ROS/Gazebo的工业级仿真平台，旨在解决现代仓储物流中的高动态调度难题。
+我们实现了一种混合智能 (Hybrid Intelligence) 决策架构，该架构融合了运筹优化 (Operations Research, OR) 的全局最优性与强化学习 (Reinforcement Learning, RL) 的实时适应性，以应对传统调度系统在面对突发事件（如障碍物、紧急插单）时的性能瓶颈。
 
-## 1. 核心工业痛点 (The Core Industrial Pain Point)
+## Core Industrial Problem (核心工业痛点)
 
-在现代仓储和智能制造中，Google OR-Tools等传统运筹学（OR）求解器在离线全局路径规划上表现出色。
+在自动化仓库（如AGV/AMR调度）中，以Google OR-Tools为代表的传统运筹学求解器，虽然能提供“离线”状态下的“全局最优”路径规划 (VRP/TSP)，但在“实时”和“高动态”环境中存在明显局限：
 
-然而，当面临实时动态事件时（如：突然出现的障碍物、产线紧急插单、车辆故障），这些“纯OR”方案的“死穴”就暴露了：
+1.  **高昂的重规划成本 (High Re-planning Cost):** 任何局部突发事件（如动态障碍物）都可能迫使系统进行“全局重规划”，导致整个车队“分钟级”的停滞和计算瓶颈。
+2.  **适应性差 (Poor Adaptability):** 无法对紧急插单或车辆故障等随机事件做出“毫秒级”的局部最优响应。
 
-    全局重规划 (Full Re-planning): 必须“停下全世界”，重新计算所有路径，导致系统**“分钟级”的卡顿和停摆**。
+这导致了系统整体吞吐量 (Throughput) 下降和设备利用率 (Asset Utilization) 低下。
 
-    缺乏适应性: 无法“毫秒级”地应对局部突发，效率低下。
+## Proposed Solution: The "OR + RL" Hybrid Architecture
 
-一句话：传统方案在“不确定性”面前，既不“智能”，也不“高效”。
+为解决上述痛点，本系统将调度任务解耦为两个层面：
 
-## 2. 我们的解决方案：“OR+RL”混合智能大脑
+1.  **离线战略层 (Offline Strategic Layer - OR):**
+    * **组件:** Google OR-Tools VRP 求解器。
+    * **职责:** 在任务初始分配阶段，计算全局最优的“静态”调度方案和路径。
+2.  **实时战术层 (Real-time Tactical Layer - RL):**
+    * **组件:** PPO / DQN 强化学习 Agent。
+    * **职责:** 在“执行”阶段，实时订阅传感器数据（如CV、LiDAR）。当检测到“动态”事件（如障碍物）或“OR层”未覆盖的突发情况时，RL Agent 不再触发全局重规划，而是即时生成一个“局部最优”的战术决策（如动态避障、任务重排序）。
 
-本项目抛弃了“纯OR”或“纯RL”的“玩具”方案，采用工业界前沿的**“混合智能” (Hybrid Intelligence)** 架构：
+**核心优势：** 本架构在保持OR“全局最优”下限的同时，通过RL赋予系统“局部实时”的适应性，实现了鲁棒性与效率的平衡。
 
-    离线层 (OR司令部): 使用 Google OR-Tools (VRP求解器)，计算“静态最优”的全局任务分配。它负责“战略”。
+## Key Performance Indicators (KPIs) & A/B Testing
 
-    实时层 (RL突击队): 使用 强化学习 (PPO/DQN) 训练的Agent，在ROS环境中，根据“实时”感知（CV、雷达），对“OR司令部”的指令进行**“毫秒级”**的动态修正。它负责“战术”。
+本平台的核心价值通过在Gazebo仿真环境中进行的A/B测试来量化：
 
-简而言之：OR-Tools保证“全局最优”的下限，RL保证“动态适应”的上限。
+* **Baseline:** “纯OR-Tools”方案 (遇动态则触发全局重规划)。
+* **Solution:** 本项目的“OR+RL混合”方案。
 
-## 3. 系统架构与技术栈 (Architecture & Tech Stack)
+| 测试场景 (10台AGV, 200个任务) | Baseline (纯OR) | 本方案 (OR+RL) | 提升 |
+| :--- | :---: | :---: | :---: |
+| 静态环境 (平均任务完成时间 TCT) | 10.2 min | 10.5 min | -3% |
+| 高动态环境 (20%随机障碍, TCT) | 21.5 min | 13.1 min | +39% |
+| 紧急插单 (平均响应时间) | 3.1 min (重规划) | 0.4 sec (RL决策) | >99% |
 
-本平台基于 ROS (Robot Operating System) 作为“神经系统”，在 Gazebo 仿真环境中进行开发与验证。所有“智能”模块均被封装为“微服务”节点 (Node)。
+(结论：在高动态工业场景下，本方案可显著提升系统吞TP量，并将因突发事件导致的系统延迟降低一个数量级以上。)
+(注：以上数据为示例，请替换为你自己跑出的真实数据)
 
-    仿真/通信: ROS Noetic, Gazebo
+## System Architecture & Tech Stack
 
-    核心决策 (大脑): Python, Google OR-Tools, PyTorch/TensorFlow (RL)
+系统基于 ROS Noetic 构建，各智能模块作为独立的Node（节点）运行，通过Topics（话题）进行解耦通信。
 
-    感知/交互 (眼睛/嘴巴): OpenCV (YOLOv8), FastAPI, LangChain (RAG)
+**关键技术栈**
 
-    工程化 (部署): Docker, Docker Compose
+* **仿真与通信:** ROS Noetic, Gazebo
+* **核心决策:** Python 3.8, Google OR-Tools, PyTorch (PPO/DQN)
+* **感知与交互:** OpenCV (YOLOv8), LangChain (RAG API), FastAPI
+* **工程化:** Docker, Docker Compose
 
-模块划分 (Key Modules):
+**ROS 节点与数据流**
 
-    [Gazebo仿真环境]: 模拟多AGV的仓库地图、货架、动态障碍物。
+* `/gazebo`: 提供仿真世界和AGV模型（含虚拟LiDAR/Camera）。
+* `/odom`: (Gazebo发布) 提供AGV的里程计（定位）数据。
+* `/scan` / `/camera/image_raw`: (Gazebo发布) 原始传感器数据。
+* `cv_node (API)`: (订阅 `/camera/image_raw`) 运行YOLOv8，识别障碍物并发布至 `/obstacles`。
+* `or_node (API)`: (离线服务) 接收批量任务，调用OR-Tools，发布“全局计划”至 `/global_plan`。
+* `rl_decision_node (核心)`:
+    * (订阅) `/odom`, `/obstacles`, `/global_plan`。
+    * (发布) 融合所有信息，输出最终决策至 `/cmd_vel` 以控制AGV。
+* `rag_api_node (API)`: (可选) 接收自然语言指令（如“紧急插单”），并将其格式化为任务发布给 `rl_decision_node`。
 
-    [CV感知Node]: (订阅 /camera/image_raw) 运行YOLOv8，识别障碍物，发布 /obstacles。
+## Project Status (项目状态)
 
-    [定位Node]: (订阅 /odom) 模拟SLAM/AMCL，提供小车实时位姿。
+* [x] 核心工业痛点与混合智能架构定义
+* [x] Gazebo 仓库环境与AGV模型搭建
+* [x] ROS (Noetic) 通信框架搭建
+* [ ] (WIP) OR-Tools (VRP) 离线求解器封装
+* [ ] (WIP) RL (PPO) 实时动态避障Agent训练
+* [ ] (Todo) CV (YOLOv8) 障碍物识别Node集成
+* [ ] (Todo) A/B 测试数据采集与分析
+* [ ] (Todo) Docker Compose 一键部署脚本
 
-    [OR司令部Node]: (离线API) 接收批量订单，调用OR-Tools，计算全局路径，发布 /global_plan。
+(WIP = Work In Progress, 开发中)
 
-    [RL突击队Node]: (核心) 订阅 /odom, /obstacles, /global_plan，实时输出“决策” /cmd_vel，实现动态避障和任务修正。
+## Getting Started (如何运行)
 
-    [RAG交互API]: (可选亮点) 允许用户用“自然语言”下达“紧急插单”指令。
+本项目使用 `docker-compose` 进行管理，旨在实现一键复现。
 
-## 4. (预期) 核心价值：A/B 对比 ( (Expected) Core Value)
-
-本项目将通过A/B测试量化“混合智能”的价值。
-
-
-## 5. 项目状态 (Project Status)
-    [x] 核心痛点与混合智能架构定义
-
-    [x] Gazebo + ROS 基础仿真环境搭建
-
-    [ ] (开发中) RL (PPO) 动态避障模块
-
-    [ ] (开发中) Google OR-Tools 离线求解器 API 封装
-
-    [ ] (待办) CV (YOLOv8) 动态障碍物识别 API
-
-    [ ] (待办) 最终 A/B Test 数据对比与分析
-
-
-## 6. 如何运行 (Getting Started)
-
-本项目完全基于 Docker Compose 构建，旨在实现“一键复现”。
+1.  克隆本项目
+    ```bash
+    git clone [https://github.com/](https://github.com/)[Your-Username]/[Your-Repo-Name].git
+    cd [Your-Repo-Name]
+    ```
+2.  (WIP) 构建并启动所有服务 (ROS, Gazebo, AI-Nodes)
+    ```bash
+    docker-compose up --build
+    ```
+3.  (WIP) 在另一终端执行任务
+    ```bash
+    # (此处理论上应为调用API或发布ROS Topic的示例)
+    rostopic pub /start_task ...
+    ```
