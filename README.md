@@ -1,6 +1,6 @@
-[项目名] Hybrid-Intelligence-Driven Logistics Scheduling Simulation Platform
-(中文：混合智能驱动的物流调度仿真平台)
+# [项目名] Hybrid-Intelligence-Driven Logistics Scheduling Simulation Platform (中文：混合智能驱动的物流调度仿真平台)
 Tags: Reinforcement Learning, Operations Research, ROS, Gazebo, Logistics, Warehouse Automation
+
 (在此处插入一张清晰的系统架构图，展示ROS节点、Topic通信和API服务流)
 
 ## Executive Summary (项目摘要)
@@ -80,7 +80,6 @@ Tags: Reinforcement Learning, Operations Research, ROS, Gazebo, Logistics, Wareh
 * [ ] (Todo) A/B 测试数据采集与分析
 * [ ] (Todo) Docker Compose 一键部署脚本
 
-(WIP = Work In Progress, 开发中)
 
 ## Getting Started (如何运行)
 
