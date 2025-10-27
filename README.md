@@ -65,8 +65,9 @@ Tags: Reinforcement Learning, Operations Research, ROS, Gazebo, Logistics, Wareh
 ## Project Status (项目状态)
 
 * [x] 核心工业痛点与混合智能架构定义
-* [x] Gazebo 仓库环境与AGV模型搭建
-* [x] ROS (Noetic) 通信框架搭建
+* [x] 强化学习PPO,OR-tool算法验证
+* [ ] Gazebo 仓库环境与AGV模型搭建
+* [ ] ROS (Noetic) 通信框架搭建
 * [ ] (WIP) OR-Tools (VRP) 离线求解器封装
 * [ ] (WIP) RL (PPO) 实时动态避障Agent训练
 * [ ] (Todo) CV (YOLOv8) 障碍物识别Node集成
