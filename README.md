@@ -37,14 +37,7 @@ Tags: Reinforcement Learning, Operations Research, ROS, Gazebo, Logistics, Wareh
 * **Baseline:** “纯OR-Tools”方案 (遇动态则触发全局重规划)。
 * **Solution:** 本项目的“OR+RL混合”方案。
 
-| 测试场景 (10台AGV, 200个任务) | Baseline (纯OR) | 本方案 (OR+RL) | 提升 |
-| :--- | :---: | :---: | :---: |
-| 静态环境 (平均任务完成时间 TCT) | 10.2 min | 10.5 min | -3% |
-| 高动态环境 (20%随机障碍, TCT) | 21.5 min | 13.1 min | +39% |
-| 紧急插单 (平均响应时间) | 3.1 min (重规划) | 0.4 sec (RL决策) | >99% |
 
-(结论：在高动态工业场景下，本方案可显著提升系统吞TP量，并将因突发事件导致的系统延迟降低一个数量级以上。)
-(注：以上数据为示例，请替换为你自己跑出的真实数据)
 
 ## System Architecture & Tech Stack
 
